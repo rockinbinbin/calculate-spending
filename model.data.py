@@ -15,6 +15,9 @@ from collections import defaultdict
 #TODO: Remove unnecessary import statements.
 #TODO: Error handling.
 
+#Question: Does supporting a variety of schedules mean data might be different from complex.input?
+#Question: Is the simple input's output in the ReadMe?
+
 class Frequency(object):
 	MONTHLY = 0
 	INTERVAL = 1
