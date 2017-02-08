@@ -1,0 +1,69 @@
+{
+    "incomes": [
+        {
+            "name": "Paycheck",
+            "amount": 380.00,
+            "type": "PRIMARY",
+            "schedule": {
+                "type": "MONTHLY",
+                "start": "2016-01-01"
+            }
+        },
+        {
+            "name": "Freelance",
+            "amount": 50.00,
+            "type": "SECONDARY",
+            "schedule": {
+                "type": "ONE-TIME",
+                "start": "2016-01-15"
+            }
+        },
+        {
+            "name": "Tax Return",
+            "amount": 20.00,
+            "type": "SECONDARY",
+            "schedule": {
+                "type": "ONE-TIME",
+                "start": "2016-01-02"
+            }
+        },
+        {
+            "name": "Freelance",
+            "amount": 150.00,
+            "type": "SECONDARY",
+            "schedule": {
+                "type": "INTERVAL",
+                "start": "2016-02-28",
+                "period": 10
+            }
+        }
+    ],
+    "expenses": [
+        {
+            "name": "Bill",
+            "amount": 250.00,
+            "schedule": {
+                "type": "INTERVAL",
+                "period": 15,
+                "start": "2016-01-01"
+            }
+        },
+        {
+            "name": "Fun",
+            "amount": 50.00,
+            "schedule": {
+                "type": "INTERVAL",
+                "period": 14,
+                "start": "2016-02-20"
+            }
+        }
+        {
+            "name": "Party",
+            "amount": 400.00,
+            "schedule": {
+                "type": "ONE-TIME",
+                "start": "2016-03-10"
+            }
+        }
+    ]
+}

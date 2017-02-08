@@ -52,7 +52,8 @@ def strToDate(str_input):
 
 class Transaction(object):
 	numTransactions = 0
-	def __init__(self, name, amount, schedule):
+	def __init__(self, event_type, name, amount, schedule):
+		self.event_type = event_type
 		self.name = name
 		self.amount = amount
 		self.schedule = create_schedule(schedule)
@@ -64,15 +65,17 @@ class Transaction(object):
 	def displayTransaction(self):
 		print("Name : ", self.name, ", Amount: ", self.amount)
 
+	def get_start_date(self):
+		return self.schedule.start
+
+	def get_frequency(self):
+		return self.schedule.frequency
 
 # TODO: Reference from inside a class.
 # TODO: Handle malformed json more elegantly.
 def create_schedule(schedule_data):
 	if schedule_data['type'] == 'INTERVAL':
-		if 'start' in schedule_data:
-			return Schedule('INTERVAL', start=schedule_data['start'])
-		else:
-			return Schedule('INTERVAL')
+		return Schedule('INTERVAL', start=schedule_data['start'], period=schedule_data['period'])
 	elif schedule_data['type'] == 'MONTHLY':
 		if 'start' in schedule_data:
 			return Schedule('MONTHLY', start=schedule_data['start'], days=schedule_data['days'])
@@ -89,17 +92,27 @@ def parse_json(path):
 		data = json.load(data_file)
 	return data
 
-def createTransactions(data):
+def createTransactions(data, event_type):
 	transaction_instances = []
 	for item in data:
-		transaction_instances.append(Transaction(item['name'], item['amount'], item['schedule']))
+		transaction_instances.append(Transaction(event_type, item['name'], item['amount'], item['schedule']))
 	return transaction_instances
 
-def main():
-	data = parse_json(sys.argv[1])
-	expense_instances = createTransactions(data['expenses'])
-	income_instances = createTransactions(data['incomes'])
-	print(income_instances[0].schedule.start)
 
-if __name__ == '__main__':
-	main()
+def get_transaction_data():
+	data = parse_json(sys.argv[1])
+	expense_instances = createTransactions(data['expenses'], "expense")
+	for expense in expense_instances:
+		expense.amount = -(expense.amount)
+
+	income_instances = createTransactions(data['incomes'], "income")
+	return income_instances, expense_instances
+
+# def main():
+# 	data = parse_json(sys.argv[1])
+# 	expense_instances = createTransactions(data['expenses'], "expense")
+# 	income_instances = createTransactions(data['incomes'], "income")
+# 	print(income_instances[0].schedule.start)
+
+# if __name__ == '__main__':
+# 	main()

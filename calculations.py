@@ -8,6 +8,7 @@ import string
 import operator
 from collections import defaultdict
 import solvency
+import timeline
 
 #Even Algorithm Module.
 #Requires: Input Array of ints (for all transaction values).
@@ -78,26 +79,60 @@ def totals_from_paychunks(all_paychunks):
 
 # Modifies all_paychunks
 def trickle_down(all_paychunks):
-	for i, paychunk in enumerate(all_paychunks):
+	count = 0
+	while (True):
+		for i, paychunk in enumerate(all_paychunks):
 
-		#if i != (len(all_paychunks) + 1):
-		forward_paychunks = all_paychunks[i+1:]
-		contendors = find_contendors(forward_paychunks, paychunk)
+			#if i != (len(all_paychunks) + 1):
+			forward_paychunks = all_paychunks[i+1:]
+			contendors = find_contendors(forward_paychunks, paychunk)
 
-		contendor_totals = totals_from_contendors(contendors)
-		average = find_average(contendor_totals)
-		paychunk.average = average
+			contendor_totals = totals_from_contendors(contendors)
+			average = find_average(contendor_totals)
+			paychunk.average = average
 
-		for contendor in contendors:
-			index = all_paychunks.index(contendor)
-			all_paychunks[index].average = average
+			for contendor in contendors:
+				index = all_paychunks.index(contendor)
+				all_paychunks[index].average = average
+		count += 1
+		if count == 1:
+			break
 			#print(index, all_paychunks[index].average, all_paychunks[index].total)
 
 	return all_paychunks
 
+def assign_spendables(inputs):
+	grouped_chunks = create_chunks(inputs)
+
+	all_paychunks = []
+	for chunk in grouped_chunks:
+		total = solvency.calculate_total(chunk)
+		paychunk = Paychunk(total, chunk)
+		all_paychunks.append(paychunk)
+
+	new_paychunks = trickle_down(all_paychunks)
+
+	test_total_spendings(inputs, new_paychunks) #comment out in production
+
+def test_total_spendings(inputs, new_paychunks):
+	first_total = 0
+	for num in inputs:
+		first_total += num
+
+	second_total = 0
+	for paychunk in new_paychunks:
+		second_total += paychunk.average
+
+	if int(first_total) == int(second_total):
+		print("calculations add up!")
+	else:
+		print(first_total, second_total)
+
+	for paychunk in new_paychunks:
+		print(paychunk.average, paychunk.total)
 
 def main():
-	inputs = [380, -250, -50, 500, -400, -50, 800, -100, 800, -300, -50, 500, -900, 500, -300]
+	#inputs = [380, -250, -50, 500, -400, -50, 800, -100, 800, -300, -50, 500, -900, 500, -300]
 
 	grouped_chunks = create_chunks(inputs)
 

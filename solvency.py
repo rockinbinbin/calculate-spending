@@ -8,6 +8,7 @@ import string
 import operator
 from collections import defaultdict
 import calculations
+import timeline
 
 #Solvency Module
 #Requires: Input array of ints
@@ -27,8 +28,7 @@ def is_solvent(inputs):
 		return False
 
 def main():
-	# extract input data from timeline
-	inputs = [380, -250, -50, 500, -400, -50, 800, -100, 800, -300, -50, 500, -900, 500, -300]
+	#inputs = [380, -250, -50, 500, -400, -50, 800, -100, 800, -300, -50, 500, -900, 500, -300]
 	if not is_solvent(inputs):
 		data = {}
 		data['error'] = 'Insolvent'
