@@ -47,15 +47,14 @@ class Paychunk(object):
 			else: #is bill
 				if len(new_chunk) != 0: # chunk not empty
 					new_chunk.append(event)
-				if i == (len(events) - 1) or events[i+1] > 0: # if i is last element or next is positive
+				if i == (len(events) - 1) or events[i+1].transaction.amount > 0: # if i is last element or next is positive
 					grouped_inputs.append(new_chunk)
 					new_chunk = list()
+
 		Paychunk.chunked_transactions = grouped_inputs
-		for chunk in Paychunk.chunked_transactions:
-			if len(chunk) >= 1:
-				print(chunk[0].transaction.amount)
-			else:
-				print(chunk)
+		# for chunk in Paychunk.chunked_transactions:
+		# 	for item in chunk:
+		# 		print(item.transaction.amount)
 		Paychunk.assign_objects()
 
 	@classmethod
