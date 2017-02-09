@@ -5,7 +5,7 @@
             "amount": 380.00,
             "type": "PRIMARY",
             "schedule": {
-                "type": "MONTHLY",
+                "type": "ONE_TIME",
                 "start": "2016-01-01"
             }
         },
@@ -14,27 +14,53 @@
             "amount": 50.00,
             "type": "SECONDARY",
             "schedule": {
-                "type": "ONE-TIME",
+                "type": "ONE_TIME",
                 "start": "2016-01-15"
             }
         },
         {
             "name": "Tax Return",
-            "amount": 20.00,
+            "amount": 500.00,
             "type": "SECONDARY",
             "schedule": {
-                "type": "ONE-TIME",
-                "start": "2016-01-02"
+                "type": "ONE_TIME",
+                "start": "2016-01-04"
             }
         },
         {
             "name": "Freelance",
-            "amount": 150.00,
+            "amount": 800.00,
             "type": "SECONDARY",
             "schedule": {
-                "type": "INTERVAL",
-                "start": "2016-02-28",
-                "period": 10
+                "type": "ONE_TIME",
+                "start": "2016-01-07"
+            }
+        },
+        {
+            "name": "Freelance",
+            "amount": 800.00,
+            "type": "SECONDARY",
+            "schedule": {
+                "type": "ONE_TIME",
+                "start": "2016-01-09"
+            }
+        },
+        {
+            "name": "Freelance",
+            "amount": 500.00,
+            "type": "SECONDARY",
+            "schedule": {
+                "type": "ONE_TIME",
+                "start": "2016-01-12"
+            }
+        },
+        {
+            "name": "Freelance",
+            "amount": 500.00,
+            "type": "SECONDARY",
+            "schedule": {
+                "type": "ONE_TIME",
+                "start": "2016-01-14"
             }
         }
     ],
@@ -43,26 +69,72 @@
             "name": "Bill",
             "amount": 250.00,
             "schedule": {
-                "type": "INTERVAL",
-                "period": 15,
-                "start": "2016-01-01"
+                "type": "ONE_TIME",
+                "start": "2016-01-02"
             }
         },
         {
             "name": "Fun",
             "amount": 50.00,
             "schedule": {
-                "type": "INTERVAL",
-                "period": 14,
-                "start": "2016-02-20"
+                "type": "ONE_TIME",
+                "start": "2016-01-03"
             }
-        }
+        },
         {
             "name": "Party",
             "amount": 400.00,
             "schedule": {
-                "type": "ONE-TIME",
-                "start": "2016-03-10"
+                "type": "ONE_TIME",
+                "start": "2016-01-05"
+            }
+        },
+        {
+            "name": "Party",
+            "amount": 50.00,
+            "schedule": {
+                "type": "ONE_TIME",
+                "start": "2016-01-06"
+            }
+        },
+        {
+            "name": "Party",
+            "amount": 100.00,
+            "schedule": {
+                "type": "ONE_TIME",
+                "start": "2016-01-08"
+            }
+        },
+        {
+            "name": "Party",
+            "amount": 300.00,
+            "schedule": {
+                "type": "ONE_TIME",
+                "start": "2016-01-10"
+            }
+        },
+        {
+            "name": "Party",
+            "amount": 50.00,
+            "schedule": {
+                "type": "ONE_TIME",
+                "start": "2016-01-11"
+            }
+        },
+        {
+            "name": "Party",
+            "amount": 900.00,
+            "schedule": {
+                "type": "ONE_TIME",
+                "start": "2016-01-13"
+            }
+        },
+        {
+            "name": "Party",
+            "amount": 300.00,
+            "schedule": {
+                "type": "ONE_TIME",
+                "start": "2016-01-15"
             }
         }
     ]

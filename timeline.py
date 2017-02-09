@@ -29,7 +29,7 @@ class Event(object):
 	all_transactions = []
 
 	default_start = dt.date(2016, 01, 01)
-	default_end = dt.date(2017, 01, 01)
+	default_end = dt.date(2016, 01, 16)
 
 	def __init__(self, transaction, date, spendable=0, sources=[]):
 		#self.event_type = event_type #if income, "allocations" in output. else "sources"

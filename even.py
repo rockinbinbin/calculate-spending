@@ -26,14 +26,16 @@ def run_with_ints():
 def run_with_events():
 	all_transactions = model.get_transaction_data(sys.argv[1])
 	events = timeline.extract_events(all_transactions)
-	timeline.Event.print_timeline()
+	# timeline.Event.print_timeline()
 
 	if solvency.is_solvent_from_events(events):
 		calculations.Paychunk.create_chunks(events)
+
 		calculations.trickle_down()
-		
+
 		for paychunk in calculations.Paychunk.all_paychunks:
 			print(paychunk.average)	
+		calculations.Paychunk.reassign_spending_per_paychunk()
 
 def run_with_whiteboard_inputs():
 	inputs = [380, -250, -50, 500, -400, -50, 800, -100, 800, -300, -50, 500, -900, 500, -300]	
