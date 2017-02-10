@@ -13,7 +13,7 @@ def total_averages_do_equal_nets():
 	total_average = 0
 	for paychunk in Paychunk.all_paychunks:
 		total_net_total += paychunk.net_total
-		total_average += paychunk.average
+		total_average += paychunk.evened_rate
 	if total_net_total == total_average:
 		return True
 	else:

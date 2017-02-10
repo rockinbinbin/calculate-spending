@@ -20,15 +20,15 @@ def trickle_down():
 		for i, paychunk in enumerate(Paychunk.all_paychunks):
 			forward_paychunks = Paychunk.all_paychunks[i+1:]
 
-			contendors = Paychunk.find_contendors(forward_paychunks, paychunk)
+			candidates = Paychunk.find_candidates(forward_paychunks, paychunk)
 
 			#contendor_totals = Paychunk.totals_from_contendors(contendors)
-			average = find_average_contendors(contendors)
-			paychunk.average = average
+			evened_rate = find_average_candidates(candidates)
+			paychunk.evened_rate = evened_rate
 
-			for contendor in contendors:
-				index = Paychunk.all_paychunks.index(contendor)
-				Paychunk.all_paychunks[index].average = average
+			for candidate in candidates:
+				index = Paychunk.all_paychunks.index(candidate)
+				Paychunk.all_paychunks[index].evened_rate = evened_rate
 		count += 1
 		if count == 100:
 			break
@@ -37,14 +37,14 @@ def trickle_down():
 class Paychunk(object):
 	chunked_transactions = [] #list split into subarrays by amount. Event objects. Ex: [(Event: {+350}, Event: {-200}, Event:{-50}), (Event: {+200}, Event:{-50}, Event:{-100})...]
 	all_paychunks = [] #list of all Paychunk objects
-	def __init__(self, net_total=0, values=[], average=0, income_event=0, initial_rate=0, net_days=1, final_average=0):
+	def __init__(self, net_total=0, values=[], evened_rate=0, income_event=0, initial_rate=0, net_days=1, evened_spending=0):
 		self.net_total = net_total #net income after bills
-		self.values = values
-		self.income_event = income_event
+		self.values = values # Events in this chunk.
+		self.income_event = income_event # Income event that allows money provisioned in this chunk.
 		self.initial_rate = initial_rate # initial daily spending. debug purposes
 		self.net_days = net_days # days until next income
-		self.average = initial_rate #trickled average
-		self.final_average = final_average
+		self.evened_rate = initial_rate #trickled average
+		self.evened_spending = evened_spending #final 
 
 	@classmethod
 	def create_chunks(self, events):
@@ -108,39 +108,31 @@ class Paychunk(object):
 		for i, paychunk in enumerate(Paychunk.all_paychunks):
 			paychunk.net_days = Paychunk.net_days(i)
 			paychunk.initial_rate = paychunk.net_total / paychunk.net_days
-			paychunk.average = paychunk.initial_rate
+			paychunk.evened_rate = paychunk.initial_rate
 
 	@classmethod
-	def find_contendors(self, forward_paychunks, prev_paychunk):
-		contendors = []
-		contendors.append(prev_paychunk)
+	def find_candidates(self, forward_paychunks, prev_paychunk):
+		candidates = []
+		candidates.append(prev_paychunk)
 		for j, chunk in enumerate(forward_paychunks):
-			if chunk.average < prev_paychunk.average: #Question: < or <=?
-				contendors.append(chunk)
+			if chunk.evened_rate < prev_paychunk.evened_rate: #Question: < or <=?
+				candidates.append(chunk)
 			else:
 				break
-		return contendors
-
-	# @classmethod
-	# def totals_from_contendors(self, contendors):
-	# 	return [contendor.average for contendor in contendors]
-
-	# @classmethod
-	# def totals_from_paychunks(self, all_paychunks):
-	# 	return [paychunk.net_total for paychunk in all_paychunks]
+		return candidates
 
 	@classmethod
 	def reassign_spending_per_paychunk(self):
 		for paychunk in Paychunk.all_paychunks:
-			paychunk.final_average = paychunk.average * paychunk.net_days
+			paychunk.evened_spending = paychunk.evened_rate * paychunk.net_days
 			Paychunk.print_paychunk(paychunk)
 
 	@classmethod
 	def print_paychunk(self, paychunk):
 		net_total = str(Decimal(paychunk.net_total).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
 		initial_rate = str(Decimal(paychunk.initial_rate).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
-		evened_rate = str(Decimal(paychunk.average).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)) # final $ per day
-		evened_spending = str(Decimal(paychunk.final_average).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)) # final $ per chunk (income event)
+		evened_rate = str(Decimal(paychunk.evened_rate).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)) # final $ per day
+		evened_spending = str(Decimal(paychunk.evened_spending).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)) # final $ per chunk (income event)
 		print("initial_net_total:", net_total, "net_days:", paychunk.net_days, "initial_rate:", initial_rate, "evened_rate:", evened_rate, "evened_spending:", evened_spending)
 
 	@classmethod
@@ -151,13 +143,11 @@ class Paychunk(object):
 
 
 #helper
-# take contendors, take average * net_days, add for all contendors. Then, divide by # of total days in contendors
-# to find out average and reassign to paychunks.
-def find_average_contendors(contendors):
+def find_average_candidates(candidates):
 	total_spending = 0
 	total_days = 0
-	for chunk in contendors:
-		total_spending += (chunk.average * chunk.net_days)
+	for chunk in candidates:
+		total_spending += (chunk.evened_rate * chunk.net_days)
 		total_days += chunk.net_days
 	return total_spending / total_days
 

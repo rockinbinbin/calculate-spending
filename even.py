@@ -24,7 +24,7 @@ def run_with_ints():
 		calculations.Paychunk.create_num_chunks(totals)
 		calculations.trickle_down()
 		for paychunk in calculations.Paychunk.all_paychunks:
-			print(paychunk.average)	
+			print(paychunk.evened_rate)	
 
 def run_with_events():
 	all_transactions = model.get_transaction_data(sys.argv[1])
@@ -46,7 +46,7 @@ def run_with_whiteboard_inputs():
 		calculations.Paychunk.create_num_chunks(inputs)
 		calculations.trickle_down()
 		for paychunk in calculations.Paychunk.all_paychunks:
-			print(paychunk.average)
+			print(paychunk.evened_rate)
 
 def output_from_paychunks():
 	data = {}
@@ -59,7 +59,7 @@ def output_from_paychunks():
 			if event.transaction.amount > 0:
 				one_event["type"] = "income"
 				# How do systems handle fractional cents?
-				one_event["spendable"] = str(Decimal(chunk.final_average).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
+				one_event["spendable"] = str(Decimal(chunk.evened_spending).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
 			else:
 				one_event["type"] = "expense"
 			events.append(one_event)
