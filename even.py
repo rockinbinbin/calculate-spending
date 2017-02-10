@@ -29,7 +29,7 @@ def run_with_ints():
 def run_with_events():
 	all_transactions = model.get_transaction_data(sys.argv[1])
 	events = timeline.extract_events(all_transactions)
-	#timeline.Event.print_timeline()
+	timeline.Event.print_timeline()
 
 	if solvency.is_solvent_from_events(events):
 		calculations.Paychunk.create_chunks(events)

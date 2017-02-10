@@ -37,16 +37,14 @@ def trickle_down():
 class Paychunk(object):
 	chunked_transactions = [] #list split into subarrays by amount. Event objects. Ex: [(Event: {+350}, Event: {-200}, Event:{-50}), (Event: {+200}, Event:{-50}, Event:{-100})...]
 	all_paychunks = [] #list of all Paychunk objects
-	def __init__(self, total=0, values=[], average=0, income_event=0, daily_spending=0, net_days=1, final_average=0):
-		self.total = total #net value
+	def __init__(self, net_total=0, values=[], average=0, income_event=0, initial_rate=0, net_days=1, final_average=0):
+		self.net_total = net_total #net income after bills
 		self.values = values
 		self.income_event = income_event
-		self.daily_spending = daily_spending
-		self.net_days = net_days
-		self.average = daily_spending #trickled average
+		self.initial_rate = initial_rate # initial daily spending. debug purposes
+		self.net_days = net_days # days until next income
+		self.average = initial_rate #trickled average
 		self.final_average = final_average
-
-		#remember: daily_spending * net_days at the end for "spending" key per income event.
 
 	@classmethod
 	def create_chunks(self, events):
@@ -84,8 +82,8 @@ class Paychunk(object):
 	@classmethod
 	def assign_objects(self):
 		for chunk in Paychunk.chunked_transactions:
-			total = solvency.total_from_events(chunk)
-			paychunk = Paychunk(total=total, values=chunk, income_event=chunk[0])
+			net_total = solvency.total_from_events(chunk)
+			paychunk = Paychunk(net_total=net_total, values=chunk, income_event=chunk[0])
 			Paychunk.all_paychunks.append(paychunk)
 		Paychunk.assign_net_spending_values()
 
@@ -109,8 +107,8 @@ class Paychunk(object):
 	def assign_net_spending_values(self):
 		for i, paychunk in enumerate(Paychunk.all_paychunks):
 			paychunk.net_days = Paychunk.net_days(i)
-			paychunk.daily_spending = paychunk.total / paychunk.net_days
-			paychunk.average = paychunk.daily_spending
+			paychunk.initial_rate = paychunk.net_total / paychunk.net_days
+			paychunk.average = paychunk.initial_rate
 
 	@classmethod
 	def find_contendors(self, forward_paychunks, prev_paychunk):
@@ -129,7 +127,7 @@ class Paychunk(object):
 
 	# @classmethod
 	# def totals_from_paychunks(self, all_paychunks):
-	# 	return [paychunk.total for paychunk in all_paychunks]
+	# 	return [paychunk.net_total for paychunk in all_paychunks]
 
 	@classmethod
 	def reassign_spending_per_paychunk(self):
@@ -139,8 +137,8 @@ class Paychunk(object):
 
 	@classmethod
 	def print_paychunk(self, paychunk):
-		net_total = str(Decimal(paychunk.total).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
-		initial_rate = str(Decimal(paychunk.daily_spending).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
+		net_total = str(Decimal(paychunk.net_total).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
+		initial_rate = str(Decimal(paychunk.initial_rate).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
 		evened_rate = str(Decimal(paychunk.average).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)) # final $ per day
 		evened_spending = str(Decimal(paychunk.final_average).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)) # final $ per chunk (income event)
 		print("initial_net_total:", net_total, "net_days:", paychunk.net_days, "initial_rate:", initial_rate, "evened_rate:", evened_rate, "evened_spending:", evened_spending)
@@ -151,15 +149,17 @@ class Paychunk(object):
 			for item in chunk:
 				print(item.transaction.amount)
 
-#helper
-def find_average_contendors(contendors):
-	total_avg = 0
-	num_candidates = 0
-	for chunk in contendors:
-		total_avg += chunk.average
-		num_candidates += 1
-	return total_avg / num_candidates
 
+#helper
+# take contendors, take average * net_days, add for all contendors. Then, divide by # of total days in contendors
+# to find out average and reassign to paychunks.
+def find_average_contendors(contendors):
+	total_spending = 0
+	total_days = 0
+	for chunk in contendors:
+		total_spending += (chunk.average * chunk.net_days)
+		total_days += chunk.net_days
+	return total_spending / total_days
 
 def find_average(inputs):
 	total = solvency.calculate_total(inputs)
