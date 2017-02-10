@@ -3,6 +3,9 @@ import model
 import timeline
 #test methods
 
+
+# ensure that allocations + spendable = income event
+
 def test_total_spendings(inputs, new_paychunks):
 	first_total = 0
 	for num in inputs:

@@ -1,6 +1,7 @@
 from __future__ import division, print_function
 import datetime as dt
 from datetime import datetime, timedelta
+from decimal import Decimal, ROUND_HALF_UP
 from calendar import monthrange
 import solvency
 import timeline
@@ -9,6 +10,8 @@ import timeline
 #Requires: Input Array of ints (for all transaction values).
 #Modifies: Input Array of ints.
 #Effects: Groups subarrays of ints based on payday into Paychunk objects with associated averages.
+
+#TODO: handle events that occur on the same day
 
 #Exposed Module Method:
 def trickle_down():
@@ -26,15 +29,14 @@ def trickle_down():
 			for contendor in contendors:
 				index = Paychunk.all_paychunks.index(contendor)
 				Paychunk.all_paychunks[index].average = average
-
 		count += 1
-		if count == 1:
+		if count == 100:
 			break
 	return Paychunk.all_paychunks
 
 class Paychunk(object):
-	chunked_transactions = [] #array split into subarrays by amount. Event objects. Ex: [(Event: {+350}, Event: {-200}, Event:{-50}), (Event: {+200}, Event:{-50}, Event:{-100})...]
-	all_paychunks = [] #array of all Paychunk objects
+	chunked_transactions = [] #list split into subarrays by amount. Event objects. Ex: [(Event: {+350}, Event: {-200}, Event:{-50}), (Event: {+200}, Event:{-50}, Event:{-100})...]
+	all_paychunks = [] #list of all Paychunk objects
 	def __init__(self, total=0, values=[], average=0, income_event=0, daily_spending=0, net_days=1, final_average=0):
 		self.total = total #net value
 		self.values = values
@@ -42,6 +44,7 @@ class Paychunk(object):
 		self.daily_spending = daily_spending
 		self.net_days = net_days
 		self.average = daily_spending #trickled average
+		self.final_average = final_average
 
 		#remember: daily_spending * net_days at the end for "spending" key per income event.
 
@@ -136,10 +139,17 @@ class Paychunk(object):
 
 	@classmethod
 	def reassign_spending_per_paychunk(self):
-		print("REASSIGNING SPENDING")
 		for paychunk in Paychunk.all_paychunks:
 			paychunk.final_average = paychunk.average * paychunk.net_days
-			print(paychunk.total, paychunk.daily_spending, paychunk.net_days, paychunk.income_event.date, paychunk.final_average, paychunk.average)
+			Paychunk.print_paychunk(paychunk)
+
+	@classmethod
+	def print_paychunk(self, paychunk):
+		net_total = str(Decimal(paychunk.total).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
+		initial_rate = str(Decimal(paychunk.daily_spending).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
+		evened_rate = str(Decimal(paychunk.average).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)) # final $ per day
+		evened_spending = str(Decimal(paychunk.final_average).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)) # final $ per chunk (income event)
+		print("initial_net_total:", net_total, "net_days:", paychunk.net_days, "initial_rate:", initial_rate, "evened_rate:", evened_rate, "evened_spending:", evened_spending)
 
 	@classmethod
 	def print_transaction_amounts(self):
@@ -148,15 +158,13 @@ class Paychunk(object):
 				print(item.transaction.amount)
 
 #helper
-# take contendors, take average * net_days, add for all contendors. Then, divide by # of total days in contendors
-# to find out average and reassign to paychunks.
 def find_average_contendors(contendors):
-	total_spending = 0
-	total_days = 0
+	total_avg = 0
+	num_candidates = 0
 	for chunk in contendors:
-		total_spending += (chunk.average * chunk.net_days)
-		total_days += chunk.net_days
-	return total_spending / total_days
+		total_avg += chunk.average
+		num_candidates += 1
+	return total_avg / num_candidates
 
 
 def find_average(inputs):

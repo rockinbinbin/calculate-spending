@@ -29,7 +29,7 @@ class Event(object):
 	all_transactions = []
 
 	default_start = dt.date(2016, 01, 01)
-	default_end = dt.date(2016, 01, 16)
+	default_end = dt.date(2017, 01, 01) #update date for different test cases!!!!!!
 
 	def __init__(self, transaction, date, spendable=0, sources=[]):
 		#self.event_type = event_type #if income, "allocations" in output. else "sources"
@@ -41,7 +41,7 @@ class Event(object):
 	@classmethod
 	def print_timeline(self):
 		for event in Event.all_events:
-			print(event.transaction.name, event.transaction.amount, event.date)
+			print(str(event.date), str(event.transaction.amount), str(event.transaction.name))
 
 	#Source: http://stackoverflow.com/questions/4039879/best-way-to-find-the-months-between-two-dates
 	@classmethod

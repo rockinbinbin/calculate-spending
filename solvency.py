@@ -1,4 +1,5 @@
 from __future__ import division, print_function
+import json
 import model
 import timeline
 
@@ -6,6 +7,8 @@ import timeline
 #Requires: Input array of ints
 #Modifies: Nothing.
 #Effects: Outputs JSON if Insolvent.
+
+#edge case: if you're overall solvent, but that's because you have a net negative for each bill (can't pay them) and then make a large sum of money at the end of the year.
 
 def total_from_events(events):
 	running_total = 0
