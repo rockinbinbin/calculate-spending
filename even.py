@@ -32,10 +32,19 @@ def run_with_events():
 	timeline.Event.print_timeline()
 
 	if solvency.is_solvent_from_events(events):
-		calculations.Paychunk.create_chunks(events)
 
+		# USE FOR ALL INCOME BASED CHUNKING
+		#----------------------------------------
+		calculations.Paychunk.create_chunks(events)
 		calculations.trickle_down()
 		calculations.Paychunk.reassign_spending_per_paychunk()
+		#----------------------------------------
+
+		#USE FOR PERIODIC // PRIMARY INCOME BASED CHUNKING
+		#----------------------------------------
+		
+		#----------------------------------------
+
 
 		#output_from_paychunks()
 

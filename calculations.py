@@ -7,9 +7,9 @@ import solvency
 import timeline
 
 #Even Algorithm Module.
-#Requires: Input Array of ints (for all transaction values).
-#Modifies: Input Array of ints.
-#Effects: Groups subarrays of ints based on payday into Paychunk objects with associated averages.
+#Requires: Input Array of Events (from timeline)
+#Modifies: Input Array of Events
+#Effects: Groups subarrays of Events based on payday into Paychunk objects. Calculates evened_spending
 
 #TODO: handle events that occur on the same day
 

@@ -25,6 +25,7 @@ def get_transaction_data(filename):
 
 	all_transactions = income_instances + expense_instances
 	Transaction.all_transactions = all_transactions
+
 	return all_transactions
 
 def parse_json(path):
@@ -35,7 +36,12 @@ def parse_json(path):
 def create_transactions(data, event_type):
 	transaction_instances = []
 	for item in data:
-		transaction_instances.append(Transaction(event_type, item['name'], item['amount'], item['schedule']))
+		
+		income_type = Income_Type.UNKNOWN
+		if "type" in item:
+			income_type = Income_Type.assign_income_type(item["type"])
+
+		transaction_instances.append(Transaction(event_type, item['name'], item['amount'], item['schedule'], income_type))
 	return transaction_instances
 
 class Frequency(object):
@@ -53,6 +59,20 @@ class Frequency(object):
 			return Frequency.ONE_TIME
 		else:
 			raise Exception('Frequency data error')
+
+class Income_Type(object):
+	UNKNOWN = 0
+	PRIMARY = 1
+	SECONDARY = 2
+
+	@classmethod
+	def assign_income_type(self, income_type_str):
+		if income_type_str == "PRIMARY":
+			return Income_Type.PRIMARY
+		elif income_type_str == "SECONDARY":
+			return Income_Type.SECONDARY
+		else:
+			return Income_Type.UNKNOWN
 
 class Schedule(object):
 	def __init__(self, frequency, start=0, period=0, days=0):
@@ -87,11 +107,12 @@ class Schedule(object):
 
 class Transaction(object):
 	all_transactions = []
-	def __init__(self, event_type, name, amount, schedule):
+	def __init__(self, event_type, name, amount, schedule, income_type=Income_Type.UNKNOWN):
 		self.event_type = event_type
 		self.name = name
 		self.amount = amount
 		self.schedule = Schedule.create_schedule(schedule)
+		self.income_type = income_type
 
 	def get_start_date(self):
 		return self.schedule.start
