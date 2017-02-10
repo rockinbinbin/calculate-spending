@@ -51,7 +51,7 @@ class Paychunk(object):
 	@classmethod
 	def create_chunks(self, events):
 		grouped_inputs = []
-		new_chunk = list()
+		new_chunk = []
 		for i, event in enumerate(events):
 			if event.transaction.amount > 0: #is paycheck
 				new_chunk.append(event)
@@ -60,7 +60,7 @@ class Paychunk(object):
 					new_chunk.append(event)
 				if i == (len(events) - 1) or events[i+1].transaction.amount > 0: # if i is last element or next is positive
 					grouped_inputs.append(new_chunk)
-					new_chunk = list()
+					new_chunk = []
 
 		Paychunk.chunked_transactions = grouped_inputs
 		Paychunk.assign_objects()
@@ -68,7 +68,7 @@ class Paychunk(object):
 	@classmethod
 	def create_num_chunks(self, inputs):
 		grouped_inputs = []
-		new_chunk = list()
+		new_chunk = []
 		for i, num in enumerate(inputs):
 			if num > 0: #is paycheck
 				new_chunk.append(num)
@@ -77,7 +77,7 @@ class Paychunk(object):
 					new_chunk.append(num)
 				if i == (len(inputs) - 1) or inputs[i+1] > 0: # if i is last element or next is positive
 					grouped_inputs.append(new_chunk)
-					new_chunk = list()
+					new_chunk = []
 		Paychunk.chunked_transactions = grouped_inputs
 		Paychunk.assign_objects()
 
@@ -123,19 +123,13 @@ class Paychunk(object):
 				break
 		return contendors
 
-	@classmethod
-	def totals_from_contendors(self, contendors):
-		totals = []
-		for contendor in contendors:
-			totals.append(contendor.average)
-		return totals
+	# @classmethod
+	# def totals_from_contendors(self, contendors):
+	# 	return [contendor.average for contendor in contendors]
 
-	@classmethod
-	def totals_from_paychunks(self, all_paychunks):
-		totals = []
-		for paychunk in all_paychunks:
-			totals.append(paychunk.total)
-		return totals
+	# @classmethod
+	# def totals_from_paychunks(self, all_paychunks):
+	# 	return [paychunk.total for paychunk in all_paychunks]
 
 	@classmethod
 	def reassign_spending_per_paychunk(self):

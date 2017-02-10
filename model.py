@@ -52,7 +52,7 @@ class Frequency(object):
 		elif frequency_str == 'ONE_TIME':
 			return Frequency.ONE_TIME
 		else:
-			print("Frequency data error")
+			raise Exception('Frequency data error')
 
 class Schedule(object):
 	def __init__(self, frequency, start=0, period=0, days=0):

@@ -11,36 +11,24 @@ import timeline
 #edge case: if you're overall solvent, but that's because you have a net negative for each bill (can't pay them) and then make a large sum of money at the end of the year.
 
 def total_from_events(events):
-	running_total = 0
-	for event in events:
-		running_total += event.transaction.amount
-	return running_total
+	return sum(event.transaction.amount for event in events)
 
 def is_solvent_from_events(events):
 	if total_from_events(events) > 0:
 		return True
 	else:
-		data = {}
-		data['error'] = 'Insolvent'
-		json_data = json.dumps(data)
-		print(json_data)
+		# typically would raise instead of print error, but need to return false
+		print({'error': 'Insolvent'})
 		return False
 
-
 #remove below methods once event logic works
-
 def calculate_total(inputs):
-	running_total = 0
-	for val in inputs:
-		running_total += val
-	return running_total
+	return sum(value for value in inputs)
 
 def is_solvent(inputs):
 	if calculate_total(inputs) > 0:
 		return True
 	else:
-		data = {}
-		data['error'] = 'Insolvent'
-		json_data = json.dumps(data)
-		print(json_data)
+		# typically would raise instead of print error, but need to return false
+		print({'error': 'Insolvent'})
 		return False
