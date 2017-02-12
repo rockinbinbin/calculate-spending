@@ -7,9 +7,9 @@ import solvency
 import timeline
 
 #Even Algorithm Module.
-#Requires: Input Array of Events (from timeline)
-#Modifies: Input Array of Events
-#Effects: Groups subarrays of Events based on payday into Paychunk objects. Calculates evened_spending
+#Requires: Timeline events
+#Modifies: Timeline events
+#Effects: Groups subarrays of Events based on payday into Paychunk objects. Calculates evened_spending.
 
 #TODO: handle events that occur on the same day
 
@@ -92,7 +92,7 @@ class Paychunk(object):
 		current_paychunk = Paychunk.all_paychunks[index]
 		dividing_factor = 1 # num of days til next paychunk
 		if index == (len(Paychunk.all_paychunks) - 1): # is last paychunk
-			dividing_factor = timeline.Event.default_end - current_paychunk.income_event.date
+			dividing_factor = timeline.Timeline.default_end - current_paychunk.income_event.date
 		else:
 			dividing_factor = Paychunk.all_paychunks[index+1].income_event.date - current_paychunk.income_event.date
 

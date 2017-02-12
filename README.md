@@ -49,7 +49,7 @@ Your program will accept a JSON map via STDIN that contains data about the custo
     "expenses": [
         {
             "name": "Rent",
-            "amount": 100.00,
+            "amount": 100.00, #Should be 120?
             "schedule": {
                 "type": "interval",
                 "period": 14,
@@ -73,7 +73,7 @@ We expect JSON over STDOUT that describes a time series of income and expense ev
         {
             "type": "income",
             "name": "Starbucks",
-            "date": "2016-01-15",
+            "date": "2016-01-15", #why 15th instead of 1st?
             "allocations": [
                 {
                     "name": "Rent",

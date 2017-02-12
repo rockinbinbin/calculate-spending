@@ -36,7 +36,7 @@ def parse_json(path):
 def create_transactions(data, event_type):
 	transaction_instances = []
 	for item in data:
-		
+
 		income_type = Income_Type.UNKNOWN
 		if "type" in item:
 			income_type = Income_Type.assign_income_type(item["type"])
@@ -105,7 +105,7 @@ class Schedule(object):
 			#throw Error -- unknown schedule frequency type. 
 			return Schedule(schedule_data['type'])
 
-class Transaction(object):
+class Transaction(object): #Input Transaction Events
 	all_transactions = []
 	def __init__(self, event_type, name, amount, schedule, income_type=Income_Type.UNKNOWN):
 		self.event_type = event_type

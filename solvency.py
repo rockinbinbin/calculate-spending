@@ -1,14 +1,13 @@
 from __future__ import division, print_function
 import json
 import model
-import timeline
 
 #Solvency Module
 #Requires: Input array of ints
 #Modifies: Nothing.
 #Effects: Outputs JSON if Insolvent.
 
-#edge case: if you're overall solvent, but that's because you have a net negative for each bill (can't pay them) and then make a large sum of money at the end of the year.
+#TODO: CONSIDER a period with not enough funds to meet an expense.
 
 def total_from_events(events):
 	return sum(event.transaction.amount for event in events)

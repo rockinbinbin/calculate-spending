@@ -6,6 +6,7 @@ import model
 import timeline
 import solvency
 import calculations
+import period
 
 #Requires: Model, Timeline, Solvency, & Calculations modules.
 #Modifies: Transaction, Event, and Paychunk classes.
@@ -16,46 +17,24 @@ import calculations
 #Todo: Assign "allocations" to income events and "sources" to expense events. (Get those clarified? Wouldn't you only have one source per expense event?)
 
 
-def run_with_ints():
-	all_transactions = model.get_transaction_data(sys.argv[1])
-	totals = timeline.extract_totals(all_transactions)
-	timeline.Event.print_timeline()
-	if solvency.is_solvent(totals):
-		calculations.Paychunk.create_num_chunks(totals)
-		calculations.trickle_down()
-		for paychunk in calculations.Paychunk.all_paychunks:
-			print(paychunk.evened_rate)	
-
 def run_with_events():
 	all_transactions = model.get_transaction_data(sys.argv[1])
-	events = timeline.extract_events(all_transactions)
-	timeline.Event.print_timeline()
+	tl = timeline.Timeline.create_timeline(all_transactions)
 
-	if solvency.is_solvent_from_events(events):
+	if solvency.is_solvent_from_events(tl.events):
 
 		# USE FOR ALL INCOME BASED CHUNKING
 		#----------------------------------------
-		calculations.Paychunk.create_chunks(events)
-		calculations.trickle_down()
-		calculations.Paychunk.reassign_spending_per_paychunk()
+		# calculations.Paychunk.create_chunks(events)
+		# calculations.trickle_down()
+		# calculations.Paychunk.reassign_spending_per_paychunk()
 		#----------------------------------------
 
 		#USE FOR PERIODIC // PRIMARY INCOME BASED CHUNKING
 		#----------------------------------------
-		
+		tl.print_periods()
 		#----------------------------------------
-
-
 		#output_from_paychunks()
-
-def run_with_whiteboard_inputs():
-	inputs = [380, -250, -50, 500, -400, -50, 800, -100, 800, -300, -50, 500, -900, 500, -300]	
-	timeline.Event.print_timeline()
-	if solvency.is_solvent(inputs):
-		calculations.Paychunk.create_num_chunks(inputs)
-		calculations.trickle_down()
-		for paychunk in calculations.Paychunk.all_paychunks:
-			print(paychunk.evened_rate)
 
 def output_from_paychunks():
 	data = {}
@@ -76,8 +55,6 @@ def output_from_paychunks():
 	pprint.pprint(data)
 
 def main():
-	#run_with_whiteboard_inputs()
-	#run_with_ints()
 	run_with_events()
 
 if __name__ == '__main__':
