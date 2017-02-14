@@ -23,7 +23,7 @@ class Event(object):
 	def print_event(self):
 		print(self.name, str(self.amount), str(self.date), self.spendable)
 		for source in self.sources:
-			print("source:")
+			print('source:')
 			print(source['name'], source['date'], source['amount'])
 		print('\n')
 
@@ -110,7 +110,10 @@ class Timeline(object):
 	@classmethod
 	def create_timeline(self, all_transactions):
 		events = Timeline.assemble_events(all_transactions)
-		periodic_events = Timeline.create_periods(events)
+
+		#not necessary for new allocations methods
+		#keep if you want to create periods by primary income
+		periodic_events = Timeline.create_periods(events) 
 		timeline = Timeline(events, periodic_events)
 		return timeline 
 
@@ -123,16 +126,16 @@ class Timeline(object):
 		events = []
 		for event in self.events:
 			one_event = dict()
-			one_event["name"] = event.name
-			one_event["date"] = event.date.strftime("%Y-%m-%d")
+			one_event['name'] = event.name
+			one_event['date'] = event.date.strftime('%Y-%m-%d')
 			if event.amount > 0:
-				one_event["type"] = "income"
+				one_event['type'] = 'income'
 				if event.spendable > 0:
-					one_event["spendable"] = str(Decimal(event.spendable).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
-				one_event["allocations"] = event.sources
+					one_event['spendable'] = str(Decimal(event.spendable).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
+				one_event['allocations'] = event.sources
 			else:
-				one_event["type"] = "expense"
-				one_event["sources"] = event.sources
+				one_event['type'] = 'expense'
+				one_event['sources'] = event.sources
 			events.append(one_event)
 		data['events'] = events
 		pprint.pprint(data)
@@ -142,21 +145,6 @@ class Timeline(object):
 			for event in period:
 				event.print_event()
 			print('\n')
-
-	# def secondary_sort(self):
-	# 	same_day_events = []
-	# 	for i, event in enumerate(self.events):
-	# 		j=i
-	# 		same_day_events = [event]
-	# 		while j != len(self.events)-1:
-	# 			if self.events[j].date == event.date:
-	# 				same_day_events.append(self.events[j])
-	# 				same_day_events.sort
-	# 			else:
-	# 				break
-	# 			j+=1
-
-
 
 #helpers
 #Source: http://stackoverflow.com/questions/4039879/best-way-to-find-the-months-between-two-dates

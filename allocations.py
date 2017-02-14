@@ -1,19 +1,10 @@
 import json
 import pprint
 from decimal import Decimal, ROUND_HALF_UP
-import operator
 import copy
 import model
 import timeline
 
-
-def add_to_income_source(income_source, event, index):
-	income_source.append({"index": index,"name": event.name, "amount": (event.amount - event.spendable), "date": event.date})
-	return income_source
-
-def update_event_sources(bill, events, bill_index):
-	events[bill_index] = bill
-	return events
 
 # Note: without this, each income event thinks it has contributed to every other bill (even previous ones)
 seen_income_indices = []
@@ -21,25 +12,21 @@ def update_alloc(bill, index, events, amount):
 	if index not in seen_income_indices:
 		seen_income_indices.append(index)
 		events[index].sources = []
-	events[index].sources.append({"name": bill.name, "date": bill.date, "amount": amount})
+	events[index].sources.append({'name': bill.name, 'date': bill.date, 'amount': amount})
 	return events
 
-def start(tl):
+def apply_allocations(tl):
 	secondary = []
 	primary = []
-	# carry_over = []
 
 	for i, event in enumerate(tl.events):
-		if event.income_type == 2: 
-			secondary = add_to_income_source(secondary, event, i)
+		if event.income_type == 2:  #'amount' = (event.amount - event.spending) if calculating spending before allocations.
+			secondary.append({'index': i,'name': event.name, 'amount': event.amount, 'date': event.date})
 		elif event.income_type == 1: 
-			primary = add_to_income_source(primary, event, i)
+			primary.append({'index': i,'name': event.name, 'amount': event.amount, 'date': event.date})
 		else: #bill
 			event, primary, secondary = allocate(event, primary, secondary, tl.events)
-			tl.events = update_event_sources(event, tl.events, i)
-
-	# print("END PRIMARY:", primary)
-	# print('END SECONDARY:', secondary)
+			tl.events[i] = event
 	return primary, secondary
 
 def allocate(bill, primary, secondary, events):
@@ -59,14 +46,6 @@ def allocate(bill, primary, secondary, events):
 
 	if carved_expense > 0:
 		print({'error': 'Insolvent'})
-		print(carved_expense)
-		bill.print_event()
-		print(primary)
-
-		primary, carved_expense, events, sources, bill = find_income_sources(primary, carved_expense, events, sources, bill)
-		all_sources.append(sources)
-		all_sources = [item for sublist in all_sources for item in sublist]
-
 
 	bill.amount = initial_expense
 	bill.sources = all_sources
@@ -79,14 +58,14 @@ def find_income_sources(income_source, carved_expense, events, sources, bill):
 			carved_expense = 0
 			break 
 		elif income['amount'] > carved_expense: # income source satisfies bill
-			sources.append({"name": income['name'], "date": income['date'], "amount": carved_expense})
+			sources.append({'name': income['name'], 'date': income['date'], 'amount': carved_expense})
 			events = update_alloc(bill, income['index'], events, carved_expense)
 			income['amount'] -= carved_expense
 			bill.amount = 0
 			carved_expense = 0
 			break
 		else: # if income source is not enough
-			sources.append({"name": income['name'], "date": income['date'], "amount": income['amount']})
+			sources.append({'name': income['name'], 'date': income['date'], 'amount': income['amount']})
 			events = update_alloc(bill, income['index'], events, income['amount'])
 			carved_expense -= income['amount']
 			income['amount'] = 0
@@ -102,10 +81,6 @@ def assemble_timeline(tl, primary, secondary):
 		item['net_days'] = net_days(index, income_sources)
 		item['evened_rate'] = item['amount'] / item['net_days'] # spending per day value
 	return income_sources
-
-def no_flow(tl, income_sources):
-	for income in income_sources:
-		tl.events[income['index']].spendable = income['amount']
 
 def flow_money(tl, income_sources):
 	count = 0
@@ -161,11 +136,14 @@ def reassign_spending_per_period(tl, income_sources):
 	for item in income_sources:
 		item['evened_spending'] = item['evened_rate'] * item['net_days']
 		tl.events[item['index']].spendable = item['evened_spending']
-	#print(income_sources)
 
+# Exposed Module Method
 def calculate_spendings(tl, primary, secondary):
 	income_sources = assemble_timeline(tl, primary, secondary)
 	flow_money(tl, income_sources)
 	reassign_spending_per_period(tl, income_sources)
-
 	#no_flow(tl, income_sources)
+
+def no_flow(tl, income_sources):
+	for income in income_sources:
+		tl.events[income['index']].spendable = income['amount']

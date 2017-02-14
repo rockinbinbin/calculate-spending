@@ -6,20 +6,6 @@ import datetime as dt
 #Modifies: Transaction objects
 #Effects: Creates Transaction objects from input data
 
-#TODO: Figure out how to reference methods in init for Classes. (@property? class method decorators?)
-#TODO: Google Generators. 
-
-def total(events):
-	return sum(event.amount for event in events)
-
-def is_solvent(events):
-	if total(events) > 0:
-		return True
-	else:
-		# typically would raise instead of print error, but need to return false
-		print({'error': 'Insolvent'})
-		return False
-
 #Exposed Module Methods
 def get_transaction_data():
 	data = parse_json()
@@ -47,8 +33,8 @@ def create_transactions(data):
 	transaction_instances = []
 	for item in data:
 		income_type = Income_Type.UNKNOWN
-		if "type" in item:
-			income_type = Income_Type.assign_income_type(item["type"])
+		if 'type' in item:
+			income_type = Income_Type.assign_income_type(item['type'])
 		transaction_instances.append(Transaction(item['name'], item['amount'], item['schedule'], income_type))
 	return transaction_instances
 
@@ -75,9 +61,9 @@ class Income_Type(object):
 
 	@classmethod
 	def assign_income_type(self, income_type_str):
-		if income_type_str == "PRIMARY":
+		if income_type_str == 'PRIMARY':
 			return Income_Type.PRIMARY
-		elif income_type_str == "SECONDARY":
+		elif income_type_str == 'SECONDARY':
 			return Income_Type.SECONDARY
 		else:
 			return Income_Type.UNKNOWN
