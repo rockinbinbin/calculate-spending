@@ -84,6 +84,8 @@ def assemble_timeline(tl, primary, secondary):
 
 def flow_money(tl, income_sources):
 	count = 0
+	# Note: Arbitrary iteration for now to smooth out spending
+	# can change when step-wise increasing spending amounts is achieved.
 	while (True):
 		for i, income in enumerate(income_sources):
 			later_incomes = income_sources[i+1:]

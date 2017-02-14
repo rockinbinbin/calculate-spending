@@ -1,8 +1,6 @@
 import allocations
 import timeline
-import even
 
-# run after output
 def sound_income_allocations(tl):
 	allocations = 0
 	spendings = 0
@@ -14,8 +12,8 @@ def sound_income_allocations(tl):
 			spendings += event.spendable
 			income_total += event.amount
 	if spendings + allocations == income_total:
-		print('sound')
 		return True
 	else:
 		print('not sound')
 		return False
+
