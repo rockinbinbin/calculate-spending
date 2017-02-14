@@ -9,6 +9,17 @@ import datetime as dt
 #TODO: Figure out how to reference methods in init for Classes. (@property? class method decorators?)
 #TODO: Google Generators. 
 
+def total(events):
+	return sum(event.amount for event in events)
+
+def is_solvent(events):
+	if total(events) > 0:
+		return True
+	else:
+		# typically would raise instead of print error, but need to return false
+		print({'error': 'Insolvent'})
+		return False
+
 #Exposed Module Methods
 def get_transaction_data():
 	data = parse_json()

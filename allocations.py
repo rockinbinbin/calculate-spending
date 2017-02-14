@@ -5,8 +5,6 @@ import operator
 import copy
 import model
 import timeline
-import solvency
-import calculations
 
 
 def add_to_income_source(income_source, event, index):

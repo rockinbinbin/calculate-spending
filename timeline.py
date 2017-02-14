@@ -27,6 +27,16 @@ class Event(object):
 			print(source['name'], source['date'], source['amount'])
 		print('\n')
 
+def total(events):
+	return sum(event.amount for event in events)
+
+def is_solvent(events):
+	if total(events) > 0:
+		return True
+	else:
+		# typically would raise instead of print error, but need to return false
+		print({'error': 'Insolvent'})
+		return False
 
 class Timeline(object):
 	default_start=dt.date(2016, 01, 01)
