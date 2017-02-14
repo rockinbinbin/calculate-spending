@@ -1,47 +1,44 @@
+import sys
 import json
 import datetime as dt
 
-#Requires: sys.arg[1] input filename
+#Requires: Nothing
 #Modifies: Transaction objects
-#Effects: get_transaction_data
+#Effects: Creates Transaction objects from input data
 
 #TODO: Figure out how to reference methods in init for Classes. (@property? class method decorators?)
 #TODO: Google Generators. 
-#TODO: Handle bad input data.
-#TODO: Error handling.
-
-#Question: Does supporting a variety of schedules mean data might be different from complex.input?
-#Question: Is the simple input's output in the ReadMe?
 
 #Exposed Module Methods
-def get_transaction_data(filename):
-	data = parse_json(filename)
-
-	income_instances = create_transactions(data['incomes'], "income")
-	expense_instances = create_transactions(data['expenses'], "expense")
-
+def get_transaction_data():
+	data = parse_json()
+	income_instances = create_transactions(data['incomes'])
+	expense_instances = create_transactions(data['expenses'])
 	for expense in expense_instances:
 		expense.amount = -(expense.amount)
+	transactions = income_instances + expense_instances
+	return transactions
 
-	all_transactions = income_instances + expense_instances
-	Transaction.all_transactions = all_transactions
+def parse_json():
+	parsed = None
+	try:
+		path = sys.argv[1]
+	except IndexError as idx_err:
+		print('Please add an input file command line arg!', idx_err)
+	else:
+		try:
+			with open(path, 'r') as data:
+				return json.load(data)
+		except ValueError as val_err:
+			print('json deserialization error, handle with fallbacks', val_err)
 
-	return all_transactions
-
-def parse_json(path):
-	with open(path,'r') as data_file:
-		data = json.load(data_file)
-	return data
-
-def create_transactions(data, event_type):
+def create_transactions(data):
 	transaction_instances = []
 	for item in data:
-
 		income_type = Income_Type.UNKNOWN
 		if "type" in item:
 			income_type = Income_Type.assign_income_type(item["type"])
-
-		transaction_instances.append(Transaction(event_type, item['name'], item['amount'], item['schedule'], income_type))
+		transaction_instances.append(Transaction(item['name'], item['amount'], item['schedule'], income_type))
 	return transaction_instances
 
 class Frequency(object):
@@ -78,16 +75,11 @@ class Schedule(object):
 	def __init__(self, frequency, start=0, period=0, days=0):
 		self.frequency = Frequency.assign_frequency(frequency)
 		if start != 0:
-			self.start = Schedule.str_to_date(start)
+			self.start = str_to_date(start)
 		else:
 			self.start = start
 		self.period = period
 		self.days = days
-
-	@classmethod
-	def str_to_date(self, str_input):
-		date = str_input.split('-')
-		return dt.date(int(date[0]), int(date[1]), int(date[2]))
 
 	# TODO: Handle malformed json more elegantly.
 	@classmethod
@@ -105,10 +97,8 @@ class Schedule(object):
 			#throw Error -- unknown schedule frequency type. 
 			return Schedule(schedule_data['type'])
 
-class Transaction(object): #Input Transaction Events
-	all_transactions = []
-	def __init__(self, event_type, name, amount, schedule, income_type=Income_Type.UNKNOWN):
-		self.event_type = event_type
+class Transaction(object):
+	def __init__(self, name, amount, schedule, income_type=Income_Type.UNKNOWN):
 		self.name = name
 		self.amount = amount
 		self.schedule = Schedule.create_schedule(schedule)
@@ -119,3 +109,8 @@ class Transaction(object): #Input Transaction Events
 
 	def get_frequency(self):
 		return self.schedule.frequency
+
+#helpers
+def str_to_date(str_input):
+	date = str_input.split('-')
+	return dt.date(int(date[0]), int(date[1]), int(date[2]))

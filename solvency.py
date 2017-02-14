@@ -10,7 +10,7 @@ import model
 #TODO: CONSIDER a period with not enough funds to meet an expense.
 
 def total_from_events(events):
-	return sum(event.transaction.amount for event in events)
+	return sum(event.amount for event in events)
 
 def is_solvent_from_events(events):
 	if total_from_events(events) > 0:

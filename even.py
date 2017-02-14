@@ -1,4 +1,3 @@
-import sys
 import json
 import pprint
 from decimal import Decimal, ROUND_HALF_UP
@@ -6,7 +5,7 @@ import model
 import timeline
 import solvency
 import calculations
-import period
+import allocations
 
 #Requires: Model, Timeline, Solvency, & Calculations modules.
 #Modifies: Transaction, Event, and Paychunk classes.
@@ -18,11 +17,9 @@ import period
 
 
 def run_with_events():
-	all_transactions = model.get_transaction_data(sys.argv[1])
-	tl = timeline.Timeline.create_timeline(all_transactions)
-
+	transactions = model.get_transaction_data()
+	tl = timeline.Timeline.create_timeline(transactions)
 	if solvency.is_solvent_from_events(tl.events):
-
 		# USE FOR ALL INCOME BASED CHUNKING
 		#----------------------------------------
 		# calculations.Paychunk.create_chunks(events)
@@ -32,27 +29,19 @@ def run_with_events():
 
 		#USE FOR PERIODIC // PRIMARY INCOME BASED CHUNKING
 		#----------------------------------------
-		tl.print_periods()
+		#tl.print_periods()
+
+
+
+		allocations.start(tl)
+		tl.output_timeline()
+
+
+
+		
+		# tl.print_timeline()
 		#----------------------------------------
 		#output_from_paychunks()
-
-def output_from_paychunks():
-	data = {}
-	events = []
-	for chunk in calculations.Paychunk.all_paychunks:
-		for event in chunk.values:
-			one_event = dict()
-			one_event["name"] = event.transaction.name
-			one_event["date"] = event.date.strftime("%Y-%m-%d")
-			if event.transaction.amount > 0:
-				one_event["type"] = "income"
-				# How do systems handle fractional cents?
-				one_event["spendable"] = str(Decimal(chunk.evened_spending).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
-			else:
-				one_event["type"] = "expense"
-			events.append(one_event)
-	data['events'] = events
-	pprint.pprint(data)
 
 def main():
 	run_with_events()
