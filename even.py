@@ -6,9 +6,9 @@ import timeline
 import allocations
 import unittests
 
-#Requires: Model, Timeline, Solvency, & Allocation modules.
-#Modifies: Transaction, Event, and Paychunk classes.
-#Effects: Models data into Transactions, builds timeline of Events, checks solvency, and computes spendable amounts by Paychunk.
+#Requires: model, timeline, allocations, and unittests modules.
+#Modifies: Transaction, Event, and Timeline classes.
+#Effects: Models data into Transactions, builds timeline of Events, checks solvency, allocates income/expense sources, & computes spendable amounts.
 
 def run_with_events():
 	transactions = model.get_transaction_data()

@@ -1,5 +1,6 @@
+import os, types
 import datetime as dt
-from datetime import datetime, timedelta
+from datetime import timedelta
 import pprint
 from decimal import Decimal, ROUND_HALF_UP
 from calendar import monthrange

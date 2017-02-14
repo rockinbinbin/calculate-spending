@@ -1,5 +1,7 @@
 import json
 import pprint
+import datetime as dt
+from datetime import timedelta
 from decimal import Decimal, ROUND_HALF_UP
 import copy
 import model
@@ -12,7 +14,7 @@ def update_alloc(bill, index, events, amount):
 	if index not in seen_income_indices:
 		seen_income_indices.append(index)
 		events[index].sources = []
-	events[index].sources.append({'name': bill.name, 'date': bill.date, 'amount': amount})
+	events[index].sources.append({'name': bill.name, 'date': bill.date.strftime('%Y-%m-%d'), 'amount': amount})
 	return events
 
 def apply_allocations(tl):
@@ -21,9 +23,9 @@ def apply_allocations(tl):
 
 	for i, event in enumerate(tl.events):
 		if event.income_type == 2:  #'amount' = (event.amount - event.spending) if calculating spending before allocations.
-			secondary.append({'index': i,'name': event.name, 'amount': event.amount, 'date': event.date})
+			secondary.append({'index': i,'name': event.name, 'amount': event.amount, 'date': event.date.strftime('%Y-%m-%d')})
 		elif event.income_type == 1: 
-			primary.append({'index': i,'name': event.name, 'amount': event.amount, 'date': event.date})
+			primary.append({'index': i,'name': event.name, 'amount': event.amount, 'date': event.date.strftime('%Y-%m-%d')})
 		else: #bill
 			event, primary, secondary = allocate(event, primary, secondary, tl.events)
 			tl.events[i] = event
@@ -45,7 +47,7 @@ def allocate(bill, primary, secondary, events):
 		all_sources = [item for sublist in all_sources for item in sublist]
 
 	if carved_expense > 0:
-		print({'error': 'Insolvent'})
+		print({'error': 'Insolvent'}) # can't cover an expense
 
 	bill.amount = initial_expense
 	bill.sources = all_sources
@@ -125,9 +127,9 @@ def net_days(index, income_sources):
 	income = income_sources[index]
 	dividing_factor = 1 # num of days til next paychunk
 	if index == (len(income_sources) - 1): # is last paychunk
-		dividing_factor = timeline.Timeline.default_end - income['date']
+		dividing_factor = timeline.Timeline.default_end - model.str_to_date(income['date'])
 	else:
-		dividing_factor = income_sources[index+1]['date'] - income['date']
+		dividing_factor = model.str_to_date(income_sources[index+1]['date']) - model.str_to_date(income['date'])
 	days = dividing_factor.days
 	if days == 0:
 		# Combine events on the same day?
