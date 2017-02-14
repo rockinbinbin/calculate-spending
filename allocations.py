@@ -1,16 +1,16 @@
 import json
 import pprint
 from decimal import Decimal, ROUND_HALF_UP
+import operator
 import copy
 import model
 import timeline
 import solvency
 import calculations
-import period
 
 
 def add_to_income_source(income_source, event, index):
-	income_source.append({"index": index,"name": event.name, "amount": event.amount, "date": event.date})
+	income_source.append({"index": index,"name": event.name, "amount": (event.amount - event.spendable), "date": event.date})
 	return income_source
 
 def update_event_sources(bill, events, bill_index):
@@ -29,6 +29,7 @@ def update_alloc(bill, index, events, amount):
 def start(tl):
 	secondary = []
 	primary = []
+	# carry_over = []
 
 	for i, event in enumerate(tl.events):
 		if event.income_type == 2: 
@@ -39,25 +40,45 @@ def start(tl):
 			event, primary, secondary = allocate(event, primary, secondary, tl.events)
 			tl.events = update_event_sources(event, tl.events, i)
 
+	# print("END PRIMARY:", primary)
+	# print('END SECONDARY:', secondary)
+	return primary, secondary
+
 def allocate(bill, primary, secondary, events):
+	all_sources = []
 	sources = []
 	initial_expense = bill.amount
 	carved_expense = -bill.amount
 
 	secondary, carved_expense, events, sources, bill = find_income_sources(secondary, carved_expense, events, sources, bill)
+	all_sources.append(sources)
+	all_sources = [item for sublist in all_sources for item in sublist]
 
 	if carved_expense > 0: # if dipping into one source isn't enough, dip into the next!
 		primary, carved_expense, events, sources, bill = find_income_sources(primary, carved_expense, events, sources, bill)
+		all_sources.append(sources)
+		all_sources = [item for sublist in all_sources for item in sublist]
 
 	if carved_expense > 0:
-		print('Insolvent for this bill')
+		print({'error': 'Insolvent'})
+		print(carved_expense)
+		bill.print_event()
+		print(primary)
+
+		primary, carved_expense, events, sources, bill = find_income_sources(primary, carved_expense, events, sources, bill)
+		all_sources.append(sources)
+		all_sources = [item for sublist in all_sources for item in sublist]
+
+
 	bill.amount = initial_expense
-	bill.sources = sources
+	bill.sources = all_sources
 	return bill, primary, secondary
 
 def find_income_sources(income_source, carved_expense, events, sources, bill):
+	income_source.reverse()
 	for i, income in enumerate(income_source):
 		if bill.amount == 0:
+			carved_expense = 0
 			break 
 		elif income['amount'] > carved_expense: # income source satisfies bill
 			sources.append({"name": income['name'], "date": income['date'], "amount": carved_expense})
@@ -70,14 +91,83 @@ def find_income_sources(income_source, carved_expense, events, sources, bill):
 			sources.append({"name": income['name'], "date": income['date'], "amount": income['amount']})
 			events = update_alloc(bill, income['index'], events, income['amount'])
 			carved_expense -= income['amount']
-			del income_source[i]	
+			income['amount'] = 0
+			del income_source[i]
+	income_source.reverse()
 	return income_source, carved_expense, events, sources, bill
 
-def calculate_spendings(tl):
-	#chunk by primary income, calculate net spendings, and subtract net spending from primary income.
-	# assign a net spending value to each primary income.
-	# run allocation algorithm.
+def assemble_timeline(tl, primary, secondary):
+	income_sources = primary + secondary
+	income_sources.sort(key=lambda item:item['date'], reverse=False)
 
+	for index, item in enumerate(income_sources):
+		item['net_days'] = net_days(index, income_sources)
+		item['evened_rate'] = item['amount'] / item['net_days'] # spending per day value
+	return income_sources
 
+def no_flow(tl, income_sources):
+	for income in income_sources:
+		tl.events[income['index']].spendable = income['amount']
 
+def flow_money(tl, income_sources):
+	count = 0
+	while (True):
+		for i, income in enumerate(income_sources):
+			later_incomes = income_sources[i+1:]
 
+			candidates = find_candidates(later_incomes, income)
+			evened_rate = find_average_candidates(candidates)
+			income['evened_rate'] = evened_rate
+
+			for candidate in candidates:
+				index = income_sources.index(candidate)
+				income_sources[index]['evened_rate'] = evened_rate
+		count += 1
+		if count == 10:
+			break
+	return tl
+
+#helper
+def find_candidates(later_incomes, income):
+	candidates = []
+	candidates.append(income)
+	for j, item in enumerate(later_incomes):
+		if item['evened_rate'] < income['evened_rate']: #Question: < or <=?
+			candidates.append(item)
+		else:
+			break
+	return candidates
+
+def find_average_candidates(candidates):
+	total_spending = 0
+	total_days = 0
+	for item in candidates:
+		total_spending += (item['evened_rate'] * item['net_days'])
+		total_days += item['net_days']
+	return total_spending / total_days
+
+def net_days(index, income_sources):
+	income = income_sources[index]
+	dividing_factor = 1 # num of days til next paychunk
+	if index == (len(income_sources) - 1): # is last paychunk
+		dividing_factor = timeline.Timeline.default_end - income['date']
+	else:
+		dividing_factor = income_sources[index+1]['date'] - income['date']
+	days = dividing_factor.days
+	if days == 0:
+		# Combine events on the same day?
+		days = 1
+	return days
+
+def reassign_spending_per_period(tl, income_sources):
+	for item in income_sources:
+		item['evened_spending'] = item['evened_rate'] * item['net_days']
+		tl.events[item['index']].spendable = item['evened_spending']
+	#print(income_sources)
+
+def calculate_spendings(tl, primary, secondary):
+	income_sources = assemble_timeline(tl, primary, secondary)
+	flow_money(tl, income_sources)
+	reassign_spending_per_period(tl, income_sources)
+
+	#no_flow(tl, income_sources)

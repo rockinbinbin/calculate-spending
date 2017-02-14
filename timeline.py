@@ -1,6 +1,7 @@
 import datetime as dt
 from datetime import datetime, timedelta
 import pprint
+from decimal import Decimal, ROUND_HALF_UP
 from calendar import monthrange
 import operator
 import model
@@ -10,19 +11,20 @@ import model
 #Effects: Timeline.create_timeline() creates a timeline of events, and periodic_events.
 
 class Event(object): 
-	def __init__(self, name, amount, date, income_type=model.Income_Type.UNKNOWN, sources=[], spendable=0):
+	def __init__(self, name, amount, date, income_type=model.Income_Type.UNKNOWN, sources=[], spendable=0, evened_rate=0):
 		self.name = name
 		self.amount = amount
 		self.date = date
 		self.income_type = income_type
 		self.sources = sources 
-		self.spendable = spendable
+		self.spendable = spendable # only for primary income events
+		self.evened_rate = evened_rate # only for primary income events
 
 	def print_event(self):
 		print(self.name, str(self.amount), str(self.date), self.spendable)
 		for source in self.sources:
 			print("source:")
-			print(str(source['name']), str(source['date']), source['amount'])
+			print(source['name'], source['date'], source['amount'])
 		print('\n')
 
 
@@ -116,7 +118,7 @@ class Timeline(object):
 			if event.amount > 0:
 				one_event["type"] = "income"
 				if event.spendable > 0:
-					one_event["spendable"] = str(Decimal(chunk.evened_spending).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
+					one_event["spendable"] = str(Decimal(event.spendable).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
 				one_event["allocations"] = event.sources
 			else:
 				one_event["type"] = "expense"
@@ -130,6 +132,21 @@ class Timeline(object):
 			for event in period:
 				event.print_event()
 			print('\n')
+
+	# def secondary_sort(self):
+	# 	same_day_events = []
+	# 	for i, event in enumerate(self.events):
+	# 		j=i
+	# 		same_day_events = [event]
+	# 		while j != len(self.events)-1:
+	# 			if self.events[j].date == event.date:
+	# 				same_day_events.append(self.events[j])
+	# 				same_day_events.sort
+	# 			else:
+	# 				break
+	# 			j+=1
+
+
 
 #helpers
 #Source: http://stackoverflow.com/questions/4039879/best-way-to-find-the-months-between-two-dates

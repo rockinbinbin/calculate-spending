@@ -4,8 +4,8 @@ from decimal import Decimal, ROUND_HALF_UP
 import model
 import timeline
 import solvency
-import calculations
 import allocations
+import unittests
 
 #Requires: Model, Timeline, Solvency, & Calculations modules.
 #Modifies: Transaction, Event, and Paychunk classes.
@@ -15,6 +15,9 @@ import allocations
 # - do this by assigning indices of paychunk objects to income events in timeline.
 #Todo: Assign "allocations" to income events and "sources" to expense events. (Get those clarified? Wouldn't you only have one source per expense event?)
 
+
+
+# NET CANNOT BE ALLOCATED FROM SECONDARY SOURCE
 
 def run_with_events():
 	transactions = model.get_transaction_data()
@@ -29,17 +32,18 @@ def run_with_events():
 
 		#USE FOR PERIODIC // PRIMARY INCOME BASED CHUNKING
 		#----------------------------------------
+
 		#tl.print_periods()
 
 
-
-		allocations.start(tl)
+		primary, secondary = allocations.start(tl)
+		allocations.calculate_spendings(tl, primary, secondary)
 		tl.output_timeline()
 
+		unittests.sound_income_allocations(tl)
 
 
-		
-		# tl.print_timeline()
+
 		#----------------------------------------
 		#output_from_paychunks()
 

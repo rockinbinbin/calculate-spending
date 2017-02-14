@@ -1,15 +1,21 @@
-import calculations
+import allocations
+import timeline
+import even
 
 # run after output
-def total_averages_do_equal_nets():
-	total_net_total = 0
-	total_average = 0
-	for paychunk in calculations.Paychunk.all_paychunks:
-		total_net_total += paychunk.net_total
-		total_average += paychunk.evened_rate
-	if total_net_total == total_average:
+def sound_income_allocations(tl):
+	allocations = 0
+	spendings = 0
+	income_total = 0
+	for event in tl.events:
+		if event.amount > 0:
+			for source in event.sources:
+				allocations += source['amount']
+			spendings += event.spendable
+			income_total += event.amount
+	if spendings + allocations == income_total:
+		print('sound')
 		return True
 	else:
+		print('not sound')
 		return False
-
-# ensure that allocations + spendable = income event
