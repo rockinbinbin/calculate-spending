@@ -21,11 +21,14 @@ def main():
 
     if timeline.is_solvent(tl.events):
         primary, secondary = allocations.apply_allocations(tl)
-        allocations.calculate_spendings(tl, primary, secondary)
-        tl.output_timeline()
 
-        unittests.sound_calculations_overall(tl)
-        unittests.timely_allocations(tl)
+        income_sources = allocations.income_source_timeline(
+            tl, primary, secondary)
+        allocations.flow_money(income_sources)
+        allocations.reassign_spending(tl, income_sources)
+
+        tl.output_timeline()
+        unittests.run_unit_tests(tl, income_sources)
 
 if __name__ == '__main__':
     main()

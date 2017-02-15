@@ -28,7 +28,8 @@ def apply_allocations(tl):
             primary.append({'index': i, 'name': event.name,
                             'amount': event.amount, 'date': event.date.strftime('%Y-%m-%d')})
         else:  # bill
-            event, primary, secondary = allocate(event, primary, secondary, tl.events)
+            event, primary, secondary = allocate(
+                event, primary, secondary, tl.events)
             tl.events[i] = event
     return primary, secondary
 
@@ -48,17 +49,29 @@ def allocate(bill, primary, secondary, events):
     all_sources += sources
 
     if carved_expense > 0:  # if dipping into one source isn't enough, dip into the next!
-        primary, carved_expense, events, sources, bill = find_income_sources(
+        primary, carved_expense, events, new_sources, bill = find_income_sources(
             primary, carved_expense, events, sources, bill)
-        all_sources += sources
+        all_sources += new_sources
 
     # if you've dipped into all secondary and primary sources, and expense
-    # still exists.
+    # isn't covered
     if carved_expense > 0:
         print({'error': 'Insolvent'})  # can't cover an expense
 
+    ######################
+    # Note: Unit test found a bug in this method last minute where some income sources were being duplicated
+    # Todo: Find actual duplication instead of just removing duplicates below.
+    seen = set()
+    new_l = []
+    for d in all_sources:
+        t = tuple(d.items())
+        if t not in seen:
+            seen.add(t)
+            new_l.append(d)
+    #######################
+
     bill.amount = initial_expense
-    bill.sources = all_sources
+    bill.sources = new_l
     return bill, primary, secondary
 
 
@@ -121,18 +134,6 @@ def income_source_timeline(tl, primary, secondary):
 ############################
 ###  CALCULATE SPENDINGS ###
 ############################
-
-
-# Exposed Module Method
-def calculate_spendings(tl, primary, secondary):
-    """ controls flow of spendable calculations 
-    """
-    income_sources = income_source_timeline(tl, primary, secondary)
-    flow_money(income_sources)
-    reassign_spending(tl, income_sources)
-    #no_flow(tl, income_sources)
-
-# HELPERS
 
 
 def must_run_again(income_sources):
@@ -208,6 +209,7 @@ def net_days(index, income_sources):
 def print_income_sources(income_sources):
     for source in income_sources:
         print(source)
+
 
 def reassign_spending(tl, income_sources):
     """ finalizes spendable amounts per income
