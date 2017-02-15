@@ -1,5 +1,7 @@
 import allocations
 import timeline
+import model
+import datetime as dt
 
 
 def sound_calculations_overall(tl):
@@ -18,17 +20,12 @@ def sound_calculations_overall(tl):
     assert spendings + allocations == income_total, "NOT SOUND CALCULATIONS"
 
 
-# def sound_income_allocations(tl):
-#     """ Asserts each income allocation + spendable + (net - spendable) == net
-#     """
-#     for event in tl.events:
-#         if event.amount > 0:
-#             allocations = 0
-#             for source in event.sources:
-#                 allocations += source.get('amount')
-#             allocated_spendings = event.amount - event.spendable
-#             if (allocations + event.spendable + allocated_spendings) != event.amount:
-#                 event.print_event()
-#             #assert (allocations + event.spendable + allocated_spendings) == event.amount, "NOT SOUND %d" %allocations
+def timely_allocations(tl):
+    for event in tl.events:
+        if event.amount > 0:
+            for source in event.sources:
+                assert model.str_to_date(source.get('date')) >= event.date
+        else:
+            for source in event.sources:
+                assert model.str_to_date(source.get('date')) <= event.date
 
-# allocations = 340

@@ -85,7 +85,7 @@ allocations.py
 
 unittests.py
 
-	sound_income_allocations(tl) asserts that overall, allocations + spendings = incomes.
+	sound_calculations_overall(tl) asserts that overall, allocations + spendings = incomes.
 
 
 

@@ -28,8 +28,7 @@ def apply_allocations(tl):
             primary.append({'index': i, 'name': event.name,
                             'amount': event.amount, 'date': event.date.strftime('%Y-%m-%d')})
         else:  # bill
-            event, primary, secondary = allocate(
-                event, primary, secondary, tl.events)
+            event, primary, secondary = allocate(event, primary, secondary, tl.events)
             tl.events[i] = event
     return primary, secondary
 
@@ -46,14 +45,12 @@ def allocate(bill, primary, secondary, events):
 
     secondary, carved_expense, events, sources, bill = find_income_sources(
         secondary, carved_expense, events, sources, bill)
-    all_sources.append(sources)
-    all_sources = [item for sublist in all_sources for item in sublist]
+    all_sources += sources
 
     if carved_expense > 0:  # if dipping into one source isn't enough, dip into the next!
         primary, carved_expense, events, sources, bill = find_income_sources(
             primary, carved_expense, events, sources, bill)
-        all_sources.append(sources)
-        all_sources = [item for sublist in all_sources for item in sublist]
+        all_sources += sources
 
     # if you've dipped into all secondary and primary sources, and expense
     # still exists.
@@ -120,7 +117,6 @@ def income_source_timeline(tl, primary, secondary):
         item['evened_rate'] = item['amount'] / \
             item['net_days']  # spending per day value
     return income_sources
-
 
 ############################
 ###  CALCULATE SPENDINGS ###
@@ -212,7 +208,6 @@ def net_days(index, income_sources):
 def print_income_sources(income_sources):
     for source in income_sources:
         print(source)
-
 
 def reassign_spending(tl, income_sources):
     """ finalizes spendable amounts per income

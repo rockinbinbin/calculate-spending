@@ -25,6 +25,7 @@ def main():
         tl.output_timeline()
 
         unittests.sound_calculations_overall(tl)
+        unittests.timely_allocations(tl)
 
 if __name__ == '__main__':
     main()
