@@ -8,9 +8,12 @@ REQUIRES:
 ========
 Python 2.7.10
 
-SETUP:
+EXECUTE:
 =====
-1. run 'python even.py complex.input.json' on command line
+
+./run.sh via command line
+
+Edit run.sh with new JSON input filenames or JSON to read from stdin to test more
 
 TESTING:
 =======
@@ -63,66 +66,58 @@ even.py
 
 	main() controls the flow of the program.
 
+
 model.py
 
 	get_transaction_data() creates a model of Transaction objects from input JSON.
+
 
 timeline.py
 
 	Timeline.create_timeline(transactions) uses Transaction objects with schedules to build a sorted by date timeline of Event objects.
 
+
 allocations.py
 	
 	apply_allocations(timeline) runs through timeline's Events and appends sources & allocations for bills based on most recent income. Uses secondary incomes first, and primary incomes for any leftover expense. 
 
+	allocations.income_source_timelines(tl, primary, secondary) prepares the resulting primary and secondary income sources for calculating spendable values. It combines the two lists, sorts by date, and assigns 'net_days' and 'evened_rate' values, which are calculated using the left-over provisioned money per date. 
 
-	calculate_spendings(tl, primary, secondary) controls the flow of spendable calculations.
+	allocations.flow_money(income_sources) calculates evened_spending money for each income source remaining from the provisioning, and reassign_spending(tl, income_sources) assigns new spending values to the corresponding event in timeline. 
 
-		income_source_timelines(tl, primary, secondary) prepares the resulting primary and secondary income sources for calculating spendable values. It combines the two lists, sorts by date, and assigns 'net_days' and 'evened_rate' values, which are calculated using the left-over provisioned money per date. 
-
-		flow_money(income_sources) calculates evened_spending money for each income source remaining from the provisioning, and reassign_spending(tl, income_sources) assigns new spending values to the corresponding event in timeline. 
+    allocations.reassign_spending(tl, income_sources) assigns spendable values based on step-wise averaged daily spendings (evened_rates) and net_days
 
 
 unittests.py
 
-	sound_calculations_overall(tl) asserts that overall, allocations + spendings = incomes.
+	Asserts validity of output :)
+	Found & fixed some bugs through tests!
 
-
-
-EVEN ALGORITHM:
-==============
-
-QUESTIONS:
-==========
 
 FUTURE CONSIDERATIONS:
 ======================
 
+Handle malformed input data. Currently expects schema like complex.input.json.
 
-I can anticipate an issue with input JSON where expenses are above incomes. The timeline currently does not do a secondary sort to place same-day income events before expense events, which is not necessary when income data is placed into a timeline before expense data. If the inputs were reversed, I would need to either edit the timeline construction to check for incomes to place before expenses, or implement a secondary sort of same-day events.
+
+Do a secondary sort for same-day events to place incomes before expenses.
 
 
 Because spending values are evened over the course of a timeline, it would be nice for a user to know how much money you are displacing to a future month (or more specifically, income period). Since for each transaction, allocations + spendings != income amounts, this could be fixed by adding an allocation for "spending money to be used next time". 
 
 
-The built timeline currently expects very specific input data based on patterns I noticed in complex.input.json. I would need to update my model to handle schedules that vary further. 
+I need to handle money calculations more accurately. Here, I'm just doing regular calculations and casting final values to Decimal rounded-half-up two places. I believe best practice to be multiplying all monetary values by 100, casting them to ints, and then dividing at the end.
 
 
-I need to handle money calculations more accurately. I didn't know what the standard approach to dealing with monetary calculations was, but I assume there would be some wrapper I would use in practice that takes care of calculations with fixed precision. Here, I'm just doing regular calculations and casting final values to Decimal rounded-half-up two places. This is likely not best practice.
+Naming conventions should be consistent, and would certainly be addressed in code reviews.
 
 
-Naming conventions should be consistent, and would certainly be addressed using a linter and code reviews. I'm new to Python, and have just started learning best practices.
+More unit testing for specific functions would be better; right now I'm testing overall output.
 
 
 NOTES:
-=====
-
-Reads input JSON via a file, instead of STDIN, easier to test. 
+======
 
 I have hardcoded the start and end dates into the Timeline class. For input data that ends significantly earlier than the end date, the last spending value will be massive as it will account for all of the remaining days until the end of the year. 
-
-
-
-
 
 

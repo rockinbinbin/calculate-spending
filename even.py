@@ -4,7 +4,7 @@ from decimal import Decimal, ROUND_HALF_UP
 import model
 import timeline
 import allocations
-import unittests
+import tests
 
 # Requires: model, timeline, allocations, and unittests modules.
 # Modifies: Transaction, Event, and Timeline classes.
@@ -28,7 +28,7 @@ def main():
         allocations.reassign_spending(tl, income_sources)
 
         tl.output_timeline()
-        unittests.run_unit_tests(tl, income_sources)
+        tests.run_tests(tl, income_sources)
 
 if __name__ == '__main__':
     main()

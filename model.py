@@ -20,7 +20,6 @@ def get_transaction_data():
     transactions = income_instances + expense_instances
     return transactions
 
-
 def parse_json():
     """ returns data from input file JSON 
     """
@@ -28,13 +27,16 @@ def parse_json():
     try:
         path = sys.argv[1]
     except IndexError as idx_err:
-        print('Please add an input file command line arg!', idx_err)
+        try:
+            return json.load(sys.stdin)
+        except ValueError as err:
+            raise (ValueError,'Malformed JSON via stdin. Should have keys incomes, expenses. You can also pass a json file path as an argument')
     else:
         try:
             with open(path, 'r') as data:
                 return json.load(data)
         except ValueError as val_err:
-            print('json deserialization error, handle with fallbacks', val_err)
+            raise(ValueError, 'Malformed JSON! Should have keys incomes, expenses')
 
 
 def create_transactions(data):

@@ -9,7 +9,7 @@ from datetime import timedelta
 # assertions instead of doing them sequentially.
 
 
-def run_unit_tests(tl, income_sources):
+def run_tests(tl, income_sources):
     """ Runs all unit tests
     """
     sound_calculations_overall(tl)
