@@ -23,7 +23,8 @@ def main():
         primary, secondary = allocations.apply_allocations(tl)
         allocations.calculate_spendings(tl, primary, secondary)
         tl.output_timeline()
-        unittests.sound_income_allocations(tl)
+
+        unittests.sound_calculations_overall(tl)
 
 if __name__ == '__main__':
     main()

@@ -108,10 +108,10 @@ Because spending values are evened over the course of a timeline, it would be ni
 The built timeline currently expects very specific input data based on patterns I noticed in complex.input.json. I would need to update my model to handle schedules that vary further. 
 
 
-I need to handle money calculations more accurately. I didn't know what the standard approach to dealing with monetary calculations was, but I assume there would be some wrapper I would use in practice that handles cents, different currencies, etc. Here, I'm just doing regular calculations and casting final values to Decimal rounded-half-up two places. This is likely not best practice.
+I need to handle money calculations more accurately. I didn't know what the standard approach to dealing with monetary calculations was, but I assume there would be some wrapper I would use in practice that takes care of calculations with fixed precision. Here, I'm just doing regular calculations and casting final values to Decimal rounded-half-up two places. This is likely not best practice.
 
 
-Naming conventions should be consistent, and would certainly be addressed using a linter and code reviews.
+Naming conventions should be consistent, and would certainly be addressed using a linter and code reviews. I'm new to Python, and have just started learning best practices.
 
 
 NOTES:

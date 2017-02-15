@@ -136,14 +136,23 @@ def calculate_spendings(tl, primary, secondary):
     reassign_spending(tl, income_sources)
     #no_flow(tl, income_sources)
 
-
 # HELPERS
+
+
+def must_run_again(income_sources):
+    """ stop running once always-increasing step-wise function is achieved.
+    """
+    for i, income in enumerate(income_sources):
+        if i != (len(income_sources) - 1) and income['evened_rate'] > income_sources[i + 1]['evened_rate']:
+            return True
+    return False
+
 
 def flow_money(income_sources):
     """ step-wise averaging function to calculate spendable money   
     """
-    should_run_again = True  # Stop running once always-increasing step-wise function is achieved.
-    while (should_run_again == True):
+    should_run_again = True
+    while (should_run_again):
         should_run_again = False
         for i, income in enumerate(income_sources):
             later_incomes = income_sources[i + 1:]
@@ -155,9 +164,7 @@ def flow_money(income_sources):
             for candidate in candidates:
                 index = income_sources.index(candidate)
                 income_sources[index]['evened_rate'] = evened_rate
-
-            if i != (len(income_sources) - 1) and income['evened_rate'] > income_sources[i + 1]['evened_rate']:
-                should_run_again = True
+        should_run_again = must_run_again(income_sources)
 
 
 def find_candidates(later_incomes, income):
@@ -202,13 +209,17 @@ def net_days(index, income_sources):
     return days
 
 
+def print_income_sources(income_sources):
+    for source in income_sources:
+        print(source)
+
+
 def reassign_spending(tl, income_sources):
     """ finalizes spendable amounts per income
     """
     for item in income_sources:
         item['evened_spending'] = item['evened_rate'] * item['net_days']
         tl.events[item['index']].spendable = item['evened_spending']
-
 # Here, allocations + spending == incomes for each event.
 
 
