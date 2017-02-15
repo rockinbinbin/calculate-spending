@@ -47,8 +47,7 @@ def is_solvent(events):
     if total(events) > 0:
         return True
     else:
-        # typically would raise instead of print error, but need to return
-        # false
+        # typically would raise instead of print error, but need to return false
         print({'error': 'Insolvent'})
         return False
 

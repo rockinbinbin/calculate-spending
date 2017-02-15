@@ -44,7 +44,7 @@ def create_transactions(data):
     for item in data:
         income_type = Income_Type.UNKNOWN
         if 'type' in item:
-            income_type = Income_Type.assign_income_type(item['type'])
+            income_type = Income_Type.map_income_type(item['type'])
         transaction_instances.append(Transaction(
             item['name'], item['amount'], item['schedule'], income_type))
     return transaction_instances
@@ -56,15 +56,15 @@ class Frequency(object):
     ONE_TIME = 2
 
     @classmethod
-    def assign_frequency(self, frequency_str):
+    def map_frequency(cls, frequency_str):
         """ returns transaction frequency 
         """
         if frequency_str == 'MONTHLY':
-            return Frequency.MONTHLY
+            return cls.MONTHLY
         elif frequency_str == 'INTERVAL':
-            return Frequency.INTERVAL
+            return cls.INTERVAL
         elif frequency_str == 'ONE_TIME':
-            return Frequency.ONE_TIME
+            return cls.ONE_TIME
         else:
             raise Exception('Frequency data error')
 
@@ -75,53 +75,34 @@ class Income_Type(object):
     SECONDARY = 2
 
     @classmethod
-    def assign_income_type(self, income_type_str):
+    def map_income_type(cls, income_type_str):
         """ returns income_type 
         """
         if income_type_str == 'PRIMARY':
-            return Income_Type.PRIMARY
+            return cls.PRIMARY
         elif income_type_str == 'SECONDARY':
-            return Income_Type.SECONDARY
+            return cls.SECONDARY
         else:
-            return Income_Type.UNKNOWN  # neither or expense
+            return cls.UNKNOWN  # expense
 
 
 class Schedule(object):
 
-    def __init__(self, frequency, start=0, period=0, days=0):
-        self.frequency = Frequency.assign_frequency(frequency)
-        if start != 0:
-            self.start = str_to_date(start)
-        else:
-            self.start = start
-        self.period = period
-        self.days = days
-
-    # TODO: Handle malformed json more elegantly.
-    @classmethod
-    def create_schedule(self, schedule_data):
-        """ returns schedule object from data 
-        """
-        if schedule_data['type'] == 'INTERVAL':
-            return Schedule('INTERVAL', start=schedule_data['start'], period=schedule_data['period'])
-        elif schedule_data['type'] == 'MONTHLY':
-            if 'start' in schedule_data:
-                return Schedule('MONTHLY', start=schedule_data['start'], days=schedule_data['days'])
-            else:
-                return Schedule(schedule_data['type'], days=schedule_data['days'])
-        elif schedule_data['type'] == 'ONE_TIME':
-            return Schedule('ONE_TIME', start=schedule_data['start'])
-        else:
-            # throw Error -- unknown schedule frequency type.
-            return Schedule(schedule_data['type'])
+    def __init__(self, schedule_data):
+        self.frequency = Frequency.map_frequency(schedule_data.get('type'))
+        self.start = schedule_data.get('start', 0)
+        if self.start != 0:
+            self.start = str_to_date(self.start)
+        self.period = schedule_data.get('period', 0)
+        self.days = schedule_data.get('days', 0)
 
 
 class Transaction(object):
 
-    def __init__(self, name, amount, schedule, income_type=Income_Type.UNKNOWN):
+    def __init__(self, name, amount, schedule_json, income_type=Income_Type.UNKNOWN):
         self.name = name
         self.amount = amount
-        self.schedule = Schedule.create_schedule(schedule)
+        self.schedule = Schedule(schedule_json)
         self.income_type = income_type
 
     def get_start_date(self):

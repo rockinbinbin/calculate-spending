@@ -54,6 +54,7 @@ My decisions on tackling the problem were two-fold:
 		Solvency is calculated first for the overall year's net value, which should be positive. 
 		During allocations, insolvency is again examined if a bill is unable to be met by previous funds. Example: (-400, -300, -200, +100000) means you're solvent overall, but insolvent for the first three bills. In my program, overall solvency is calculated initially, and expense-based solvency is calculated while allocating & provisioning for bills.
 
+Ran final project through PEP8.
 
 CODE STRUCTURE:
 ===============
@@ -116,6 +117,7 @@ Naming conventions should be consistent, and would certainly be addressed using 
 NOTES:
 =====
 
+Reads input JSON via a file, instead of STDIN, easier to test. 
 
 I have hardcoded the start and end dates into the Timeline class. For input data that ends significantly earlier than the end date, the last spending value will be massive as it will account for all of the remaining days until the end of the year. 
 
